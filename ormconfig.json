@@ -1,0 +1,9 @@
+{
+  "type": "mysql",
+  "host": "localhost",
+  "username": "sa",
+  "password": "TodA9g=hkdit0jk",
+  "database": "trd-report",
+  "entities": ["dist/**/*.entity{.ts,.js}"],
+  "synchronize": true
+}
