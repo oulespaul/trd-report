@@ -146,7 +146,7 @@ export class StructureReportController {
         {
           label: 'StartTime',
           property: 'startTime',
-          width: 55,
+          width: 50,
           renderer: (value) => {
             return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
           },
@@ -186,13 +186,13 @@ export class StructureReportController {
         {
           label: 'TgtTable',
           property: 'tgtTable',
-          width: 55,
+          width: 50,
           renderer: null,
         },
         {
           label: 'InsertedRows',
           property: 'insertedRows',
-          width: 55,
+          width: 50,
           renderer: null,
         },
       ],
