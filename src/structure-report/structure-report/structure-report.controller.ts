@@ -1,8 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { JobsLog } from 'src/entity/structure-logs.entity';
 import { StructureReportService } from './structure-report.service';
-import * as PDFDocument from 'pdfkit';
+import * as PDFDocument from 'pdfkit-table';
 import * as dayjs from 'dayjs';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
@@ -111,19 +113,99 @@ export class StructureReportController {
   ) {
     const dateFormat = dayjs().format('YYYYMMDD');
     const fileName = `structure_report_${dateFormat}.pdf`;
-    const doc = new PDFDocument({ bufferPages: true });
-    const stream = res.writeHead(200, {
+
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+    res.writeHead(200, {
       'Content-Type': 'application/pdf',
       'Content-disposition': `attachment;filename=${fileName}`,
     });
-    doc.on('data', (chunk) => stream.write(chunk));
-    doc.on('end', () => stream.end());
 
     const logs = await this.structureReportService.getAll(startDate, endDate);
 
-    logs.map((log) => {
-      return doc.font('Times-Roman').fontSize(12).text(JSON.stringify(log));
-    });
+    const tableArray = {
+      headers: [
+        {
+          label: 'ExecKey',
+          property: 'execKey',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'JobId',
+          property: 'jobId',
+          width: 40,
+          renderer: null,
+        },
+        {
+          label: 'JobStatus',
+          property: 'jobStatus',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'StartTime',
+          property: 'startTime',
+          width: 55,
+          renderer: (value) => {
+            return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+          },
+        },
+        {
+          label: 'EndTime',
+          property: 'endTime',
+          width: 50,
+          renderer: (value) => {
+            return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+          },
+        },
+        {
+          label: 'ScrDb',
+          property: 'scrDb',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'ScrTable',
+          property: 'scrTable',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'ScrRows',
+          property: 'scrRows',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'TgtDb',
+          property: 'tgtDb',
+          width: 50,
+          renderer: null,
+        },
+        {
+          label: 'TgtTable',
+          property: 'tgtTable',
+          width: 55,
+          renderer: null,
+        },
+        {
+          label: 'InsertedRows',
+          property: 'insertedRows',
+          width: 55,
+          renderer: null,
+        },
+      ],
+      datas: logs.map((item) => ({
+        ...item,
+        startTime: item.startTime.toString(),
+        endTime: item.endTime.toString(),
+      })),
+    };
+
+    doc.table(tableArray, { width: 580 });
+
+    doc.pipe(res);
 
     doc.end();
   }

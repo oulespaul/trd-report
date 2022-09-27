@@ -1,10 +1,12 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { UnStructureReportService } from './un-structure-report.service';
 import { ApiExcludeEndpoint, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UnstructureLogs } from 'src/entity/un-structure-logs.entity';
 import { StampReportDto } from './dto/stamp-report.dto';
 import { Response } from 'express';
-import * as PDFDocument from 'pdfkit';
+import * as PDFDocument from 'pdfkit-table';
 import * as dayjs from 'dayjs';
 
 @Controller('un-structure-report')
@@ -118,19 +120,65 @@ export class UnStructureReportController {
   ) {
     const dateFormat = dayjs(new Date(startDate)).format('YYYYMMDD');
     const fileName = `un_structure_report_${dateFormat}.pdf`;
-    const doc = new PDFDocument({ bufferPages: true });
-    const stream = res.writeHead(200, {
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+    res.writeHead(200, {
       'Content-Type': 'application/pdf',
       'Content-disposition': `attachment;filename=${fileName}`,
     });
-    doc.on('data', (chunk) => stream.write(chunk));
-    doc.on('end', () => stream.end());
 
     const logs = await this.unStructureReportService.getAll(startDate, endDate);
 
-    logs.map((log) => {
-      return doc.font('Times-Roman').fontSize(12).text(JSON.stringify(log));
-    });
+    const tableArray = {
+      headers: [
+        {
+          label: 'IngestionDatetime',
+          property: 'ingestionDatetime',
+          width: 95,
+          renderer: (value) => {
+            return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+          },
+        },
+        {
+          label: 'SrcFolder',
+          property: 'srcFolder',
+          width: 95,
+          renderer: null,
+        },
+        {
+          label: 'TotalSrcFile',
+          property: 'totalSrcFile',
+          width: 95,
+          renderer: null,
+        },
+        {
+          label: 'TgtFolder',
+          property: 'tgtFolder',
+          width: 95,
+          renderer: null,
+        },
+        {
+          label: 'TotalFileLoaded',
+          property: 'totalFileLoaded',
+          width: 95,
+          renderer: null,
+        },
+        {
+          label: 'Status',
+          property: 'status',
+          width: 95,
+          renderer: null,
+        },
+      ],
+      datas: logs.map((item) => ({
+        ...item,
+        ingestionDatetime: item.ingestionDatetime.toString(),
+      })),
+    };
+
+    doc.table(tableArray, { width: 580 });
+
+    doc.pipe(res);
 
     doc.end();
   }
