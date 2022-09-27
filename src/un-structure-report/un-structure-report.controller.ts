@@ -134,40 +134,46 @@ export class UnStructureReportController {
         {
           label: 'IngestionDatetime',
           property: 'ingestionDatetime',
-          width: 95,
+          width: 90,
           renderer: (value) => {
             return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
           },
+          align: 'center',
         },
         {
           label: 'SrcFolder',
           property: 'srcFolder',
-          width: 95,
+          width: 90,
           renderer: null,
+          align: 'center',
         },
         {
           label: 'TotalSrcFile',
           property: 'totalSrcFile',
-          width: 95,
+          width: 90,
           renderer: null,
+          align: 'center',
         },
         {
           label: 'TgtFolder',
           property: 'tgtFolder',
-          width: 95,
+          width: 90,
           renderer: null,
+          align: 'center',
         },
         {
           label: 'TotalFileLoaded',
           property: 'totalFileLoaded',
-          width: 95,
+          width: 90,
           renderer: null,
+          align: 'center',
         },
         {
           label: 'Status',
           property: 'status',
-          width: 95,
+          width: 90,
           renderer: null,
+          align: 'center',
         },
       ],
       datas: logs.map((item) => ({
@@ -176,7 +182,27 @@ export class UnStructureReportController {
       })),
     };
 
-    doc.table(tableArray, { width: 580 });
+    doc.table(tableArray, {
+      width: 580,
+      prepareRow: (row, indexColumn, indexRow, rectRow, rectCell) => {
+        const { x, y, width, height } = rectCell;
+
+        // first line
+        if (indexColumn === 0) {
+          doc
+            .lineWidth(0.2)
+            .moveTo(x, y)
+            .lineTo(x, y + height)
+            .stroke();
+        }
+
+        doc
+          .lineWidth(0.2)
+          .moveTo(x + width, y)
+          .lineTo(x + width, y + height)
+          .stroke();
+      },
+    });
 
     doc.pipe(res);
 
