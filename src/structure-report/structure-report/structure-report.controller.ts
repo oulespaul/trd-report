@@ -209,8 +209,8 @@ export class StructureReportController {
       ],
       datas: logs.map((item) => ({
         ...item,
-        startTime: item?.startTime.toString() || '',
-        endTime: item?.endTime.toString() || '',
+        startTime: item.startTime?.toString() || '',
+        endTime: item.endTime?.toString() || '',
       })),
     };
 
