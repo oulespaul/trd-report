@@ -178,7 +178,7 @@ export class UnStructureReportController {
       ],
       datas: logs.map((item) => ({
         ...item,
-        ingestionDatetime: item.ingestionDatetime.toString(),
+        ingestionDatetime: item.ingestionDatetime?.toString() || '',
       })),
     };
 
